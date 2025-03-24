@@ -1,0 +1,125 @@
+{
+  "Version": 1,
+  "WorkspaceRootPath": "C:\\Users\\bapti\\OneDrive - De Vinci\\Ann\u00E9e 2\\S2\\Probl\u00E8mes informatiques\\rendu 30 mars\\LivIn_Paris_Bien\\",
+  "Documents": [
+    {
+      "AbsoluteMoniker": "D:0:0:{84CCAEB6-105C-4C2D-81DD-59863503B1F0}|LivIn_Paris\\LivIn_Paris.csproj|c:\\users\\bapti\\onedrive - de vinci\\ann\u00E9e 2\\s2\\probl\u00E8mes informatiques\\rendu 30 mars\\livin_paris_bien\\livin_paris\\noeud.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{84CCAEB6-105C-4C2D-81DD-59863503B1F0}|LivIn_Paris\\LivIn_Paris.csproj|solutionrelative:livin_paris\\noeud.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{84CCAEB6-105C-4C2D-81DD-59863503B1F0}|LivIn_Paris\\LivIn_Paris.csproj|c:\\users\\bapti\\onedrive - de vinci\\ann\u00E9e 2\\s2\\probl\u00E8mes informatiques\\rendu 30 mars\\livin_paris_bien\\livin_paris\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{84CCAEB6-105C-4C2D-81DD-59863503B1F0}|LivIn_Paris\\LivIn_Paris.csproj|solutionrelative:livin_paris\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{84CCAEB6-105C-4C2D-81DD-59863503B1F0}|LivIn_Paris\\LivIn_Paris.csproj|c:\\users\\bapti\\onedrive - de vinci\\ann\u00E9e 2\\s2\\probl\u00E8mes informatiques\\rendu 30 mars\\livin_paris_bien\\livin_paris\\lien.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{84CCAEB6-105C-4C2D-81DD-59863503B1F0}|LivIn_Paris\\LivIn_Paris.csproj|solutionrelative:livin_paris\\lien.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{84CCAEB6-105C-4C2D-81DD-59863503B1F0}|LivIn_Paris\\LivIn_Paris.csproj|c:\\users\\bapti\\onedrive - de vinci\\ann\u00E9e 2\\s2\\probl\u00E8mes informatiques\\rendu 30 mars\\livin_paris_bien\\livin_paris\\graph.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{84CCAEB6-105C-4C2D-81DD-59863503B1F0}|LivIn_Paris\\LivIn_Paris.csproj|solutionrelative:livin_paris\\graph.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{84CCAEB6-105C-4C2D-81DD-59863503B1F0}|LivIn_Paris\\LivIn_Paris.csproj|c:\\users\\bapti\\onedrive - de vinci\\ann\u00E9e 2\\s2\\probl\u00E8mes informatiques\\rendu 30 mars\\livin_paris_bien\\livin_paris\\liv\u0027in paris.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{84CCAEB6-105C-4C2D-81DD-59863503B1F0}|LivIn_Paris\\LivIn_Paris.csproj|solutionrelative:livin_paris\\liv\u0027in paris.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{84CCAEB6-105C-4C2D-81DD-59863503B1F0}|LivIn_Paris\\LivIn_Paris.csproj|C:\\Users\\bapti\\OneDrive - De Vinci\\Ann\u00E9e 2\\S2\\Probl\u00E8mes informatiques\\rendu 30 mars\\LivIn_Paris_Bien\\livin_paris\\liv\u0027in paris.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}|Form",
+      "RelativeMoniker": "D:0:0:{84CCAEB6-105C-4C2D-81DD-59863503B1F0}|LivIn_Paris\\LivIn_Paris.csproj|solutionrelative:livin_paris\\liv\u0027in paris.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}|Form"
+    }
+  ],
+  "DocumentGroupContainers": [
+    {
+      "Orientation": 0,
+      "VerticalTabListWidth": 256,
+      "DocumentGroups": [
+        {
+          "DockedWidth": 200,
+          "SelectedChildIndex": 1,
+          "Children": [
+            {
+              "$type": "Document",
+              "DocumentIndex": 3,
+              "Title": "Graph.cs",
+              "DocumentMoniker": "C:\\Users\\bapti\\OneDrive - De Vinci\\Ann\u00E9e 2\\S2\\Probl\u00E8mes informatiques\\rendu 30 mars\\LivIn_Paris_Bien\\LivIn_Paris\\Graph.cs",
+              "RelativeDocumentMoniker": "LivIn_Paris\\Graph.cs",
+              "ToolTip": "C:\\Users\\bapti\\OneDrive - De Vinci\\Ann\u00E9e 2\\S2\\Probl\u00E8mes informatiques\\rendu 30 mars\\LivIn_Paris_Bien\\LivIn_Paris\\Graph.cs",
+              "RelativeToolTip": "LivIn_Paris\\Graph.cs",
+              "ViewState": "AQIAAJABAAAAAAAAAAAYwKwBAAA3AAAA",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-03-16T14:44:20.079Z",
+              "IsPinned": true
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 0,
+              "Title": "Noeud.cs",
+              "DocumentMoniker": "C:\\Users\\bapti\\OneDrive - De Vinci\\Ann\u00E9e 2\\S2\\Probl\u00E8mes informatiques\\rendu 30 mars\\LivIn_Paris_Bien\\LivIn_Paris\\Noeud.cs",
+              "RelativeDocumentMoniker": "LivIn_Paris\\Noeud.cs",
+              "ToolTip": "C:\\Users\\bapti\\OneDrive - De Vinci\\Ann\u00E9e 2\\S2\\Probl\u00E8mes informatiques\\rendu 30 mars\\LivIn_Paris_Bien\\LivIn_Paris\\Noeud.cs",
+              "RelativeToolTip": "LivIn_Paris\\Noeud.cs",
+              "ViewState": "AgIAAEkAAAAAAAAAAAA0wF4AAAB5AAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-03-16T14:42:26.827Z",
+              "IsPinned": true,
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 1,
+              "Title": "Program.cs",
+              "DocumentMoniker": "C:\\Users\\bapti\\OneDrive - De Vinci\\Ann\u00E9e 2\\S2\\Probl\u00E8mes informatiques\\rendu 30 mars\\LivIn_Paris_Bien\\LivIn_Paris\\Program.cs",
+              "RelativeDocumentMoniker": "LivIn_Paris\\Program.cs",
+              "ToolTip": "C:\\Users\\bapti\\OneDrive - De Vinci\\Ann\u00E9e 2\\S2\\Probl\u00E8mes informatiques\\rendu 30 mars\\LivIn_Paris_Bien\\LivIn_Paris\\Program.cs",
+              "RelativeToolTip": "LivIn_Paris\\Program.cs",
+              "ViewState": "AQIAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-03-17T20:44:29.37Z",
+              "IsPinned": true
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 4,
+              "Title": "Liv\u0027In Paris.cs",
+              "DocumentMoniker": "C:\\Users\\bapti\\OneDrive - De Vinci\\Ann\u00E9e 2\\S2\\Probl\u00E8mes informatiques\\rendu 30 mars\\LivIn_Paris_Bien\\LivIn_Paris\\Liv\u0027In Paris.cs",
+              "RelativeDocumentMoniker": "LivIn_Paris\\Liv\u0027In Paris.cs",
+              "ToolTip": "C:\\Users\\bapti\\OneDrive - De Vinci\\Ann\u00E9e 2\\S2\\Probl\u00E8mes informatiques\\rendu 30 mars\\LivIn_Paris_Bien\\LivIn_Paris\\Liv\u0027In Paris.cs",
+              "RelativeToolTip": "LivIn_Paris\\Liv\u0027In Paris.cs",
+              "ViewState": "AQIAAGgAAAAAAAAAAAAuwHcAAABOAAAA",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-03-17T20:47:36.542Z",
+              "IsPinned": true,
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:0:0:{34e76e81-ee4a-11d0-ae2e-00a0c90fffc3}"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 2,
+              "Title": "Lien.cs",
+              "DocumentMoniker": "C:\\Users\\bapti\\OneDrive - De Vinci\\Ann\u00E9e 2\\S2\\Probl\u00E8mes informatiques\\rendu 30 mars\\LivIn_Paris_Bien\\LivIn_Paris\\Lien.cs",
+              "RelativeDocumentMoniker": "LivIn_Paris\\Lien.cs",
+              "ToolTip": "C:\\Users\\bapti\\OneDrive - De Vinci\\Ann\u00E9e 2\\S2\\Probl\u00E8mes informatiques\\rendu 30 mars\\LivIn_Paris_Bien\\LivIn_Paris\\Lien.cs",
+              "RelativeToolTip": "LivIn_Paris\\Lien.cs",
+              "ViewState": "AQIAAAIAAAAAAAAAAAAxwAIAAAACAAAA",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-03-17T18:34:22.878Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 5,
+              "Title": "Liv\u0027In Paris.cs [Conception]",
+              "DocumentMoniker": "C:\\Users\\bapti\\OneDrive - De Vinci\\Ann\u00E9e 2\\S2\\Probl\u00E8mes informatiques\\rendu 30 mars\\LivIn_Paris_Bien\\LivIn_Paris\\Liv\u0027In Paris.cs",
+              "RelativeDocumentMoniker": "LivIn_Paris\\Liv\u0027In Paris.cs",
+              "ToolTip": "C:\\Users\\Baptiste PALASI\\OneDrive - DVHE\\Probl\u00E8mes informatiques\\rendu 30 mars\\LivIn_Paris_Bien\\LivIn_Paris\\Liv\u0027In Paris.cs [Conception]",
+              "RelativeToolTip": "..\\..\\..\\..\\..\\..\\..\\Baptiste PALASI\\OneDrive - DVHE\\Probl\u00E8mes informatiques\\rendu 30 mars\\LivIn_Paris_Bien\\LivIn_Paris\\Liv\u0027In Paris.cs [Conception]",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-03-17T20:47:03.897Z"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
