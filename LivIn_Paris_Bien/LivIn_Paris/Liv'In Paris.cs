@@ -1,10 +1,22 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Data;
+using System.Drawing;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using System.Windows.Forms;
+using static System.Windows.Forms.VisualStyles.VisualStyleElement;
+
 namespace LivIn_Paris
 {
     public partial class Liv_In_Paris : Form
     {
+
+
+        
+
         public Liv_In_Paris()
         {
             InitializeComponent();
@@ -70,6 +82,7 @@ namespace LivIn_Paris
             #region Dijkstra
             Button btnDijkstra = new System.Windows.Forms.Button { Text = "Dijkstra", AutoSize = true};
 
+            bool AfficherDijkstra = false;
             string stationA = "";
             string stationB = "";
 
@@ -93,15 +106,15 @@ namespace LivIn_Paris
                     AfficherDijkstra = !AfficherDijkstra;
 
                     if (AfficherDijkstra || LectureNœudA != stationA || stationB != LectureNœudB)
-                    {
+                {
                         stationA = LectureNœudA;
                         stationB = LectureNœudB;
 
                         AfficherDijkstra = true;
                         chemin = g.Dijkstra(LectureNœudA, LectureNœudB, "Rouge");
-                        if (chemin != null) chemin.AfficherGraphique(panelAffichage);
+                    if (chemin != null) chemin.AfficherGraphique(panelAffichage);
                     }
-                    
+
                 }
             };
 
@@ -111,7 +124,8 @@ namespace LivIn_Paris
             #region BellmanFord
             System.Windows.Forms.Button btnBellmanFord = new System.Windows.Forms.Button { Text = "BellmanFord", AutoSize = true , Location = new Point(btnDijkstra.Location.X + btnDijkstra.Width+10, btnDijkstra.Location.Y) };
 
-            
+            bool AfficherBellmanFord = false;
+
 
             btnBellmanFord.Click += (s, e) =>
             {
@@ -133,14 +147,14 @@ namespace LivIn_Paris
                     AfficherBellmanFord = !AfficherBellmanFord;
 
                     if (AfficherBellmanFord || LectureNœudA != stationA || stationB != LectureNœudB)
-                    {
+                {
 
 
                         stationA = LectureNœudA;
                         stationB = LectureNœudB;
 
                         chemin = g.BellmanFord(LectureNœudA, LectureNœudB, "Bleu");
-                        if (chemin != null) chemin.AfficherGraphique(panelAffichage);
+                    if (chemin != null) chemin.AfficherGraphique(panelAffichage);
                         AfficherBellmanFord = true;
                     }
                 }
@@ -175,7 +189,7 @@ namespace LivIn_Paris
                         Graph<string> chemin = g.BellmanFord(stationA, stationB, "");
                         if (chemin != null) chemin.AfficherGraphique(panelAffichage);
                     }
-                    #endregion
+            #endregion
 
                     #region Modification des poids de Liens et du temps de changement des Noeuds
                     if (!coché)
@@ -221,7 +235,7 @@ namespace LivIn_Paris
                 };
 
                 panelAffichage.Controls.Add(CheckBox);
-            }
+        }
             #endregion
             panelAffichage.Controls.Add(btnRendreLigneInutilisable);
            
