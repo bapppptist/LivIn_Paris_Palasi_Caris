@@ -1,17 +1,23 @@
-namespace LivIn_Paris
+﻿namespace LivIn_Paris
 {
-    internal static class Program
+    internal class Program
     {
-        /// <summary>
-        ///  The main entry point for the application.
-        /// </summary>
         [STAThread]
         static void Main()
         {
-            // To customize application configuration such as set high DPI settings or default font,
-            // see https://aka.ms/applicationconfiguration.
             ApplicationConfiguration.Initialize();
-            Application.Run(new Form1());
+            
+            System.Windows.Forms.Application.Run(new Liv_In_Paris());
         }
+
+
+        static void ShowPanel(Panel panel)
+        {
+            panel.BringToFront();
+        }
+
+
+
     }
 }
+

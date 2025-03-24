@@ -1,228 +1,164 @@
-﻿
-using System;
-using System.Collections.Generic;
-using System.Drawing;
-using System.Drawing.Drawing2D;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using static System.Net.Mime.MediaTypeNames;
-using System.Windows.Forms;
-using System.Runtime.CompilerServices;
+﻿using System.Drawing.Drawing2D;
+using OfficeOpenXml;
 
-namespace Graph_Karaté
+namespace LivIn_Paris
 {
-    public class Graph<T>
+    public class Graph<T> where T : IConvertible
     {
         #region Attribut
-        public int Ordre { get; set; }
         public int Taille { get; set; } 
         public List<Lien<T>> ListeLien = new List<Lien<T>>();
-        public bool[,] MatriceAdjacence { get; set; }
         public List<Noeud<T>> ListeNoeud { get; set; }
-        public Form form { get; set; }
+        string  Couleur;
         #endregion
 
         #region Construction du Graph
-
         /// <summary>
-        ///  Construit le graph de 2 maniere differente : Listes d’adjacence et Matrice d’adjacence
+        /// Construit le graph sous la forme d'une Listes d’adjacence à partir d'un fichier Exel.
         /// </summary>
-        /// <param name="chaine"></param>
-        public Graph(string chaine, Form form) // chaine doit etre sous la forme : "num Noeud, num Noeud , ... , num Neud"
+        /// <param name="filePath"></param>
+        public Graph(string filePath)
         {
             ListeLien = new List<Lien<T>>();
             ListeNoeud = new List<Noeud<T>>();
-            string[] elements = chaine.Split(',');
-
-            #region Liste d'adjacence
-            for (int i = 0; i < elements.Length; i += 2)
-            {
-                if (int.TryParse(elements[i], out int debutNum) && int.TryParse(elements[i + 1], out int finNum))
-                {
-                    Noeud debut = TrouverOuCreerNoeud(debutNum);
-                    Noeud fin = TrouverOuCreerNoeud(finNum);
-
-                    AjouterLien(debut, fin);
-                }
-            }
-            #endregion
             
-            #region Matrice d'adjacence
-            CalculerOrdre();
-            MatriceAdjacence = new bool[Ordre, Ordre];
-            for (int i = 0; i < elements.Length; i += 2)
+            
+            ExcelPackage.LicenseContext = LicenseContext.NonCommercial;
+
+            using (var package = new ExcelPackage(new FileInfo(filePath)))
             {
-                if (int.TryParse(elements[i], out int debutNum) && int.TryParse(elements[i + 1], out int finNum))
+                #region Creation des Noeud et des Liens
+
+                #region Recuperation des données des Liens
+                var worksheet = package.Workbook.Worksheets[1]; // Première feuille (index 0)
+                int rowCount = worksheet.Dimension.Rows; // Nombre total de lignes
+
+                for (int row = 2; row <= rowCount; row++) // Parcours des lignes
                 {
-                    MatriceAdjacence[debutNum - 1, finNum - 1] = true;
-                    MatriceAdjacence[finNum - 1, debutNum - 1] = true;
+                    T nom = (T)Convert.ChangeType(worksheet.Cells[row, 2].Text, typeof(T)); // Nom du noeud
+                    Noeud<T> Station = TrouverOuCréerNœud(nom); // Creation du Noeud
+
+                    if (worksheet.Cells[row, 4].Text != "") //Si il y a un noeud suivany
+                    {
+                        T Suivant = (T)Convert.ChangeType(worksheet.Cells[row, 4].Text, typeof(T)); // nom du neud suivant
+                        Noeud<T> StationSuivante = TrouverOuCréerNœud(Suivant); // Creation du Noeud
+
+                        bool LienOrienté = false;
+
+                        string Ligne = worksheet.Cells[row, 5].Text;
+
+                        if (worksheet.Cells[row, 6].Text == "orienté")
+                        {
+                            LienOrienté = true;
+                        }
+                        AjouterLien(Station, StationSuivante, LienOrienté, Ligne); // Creation du lien
+                    }
+                }
+                #endregion
+
+                #region Recuperation des données des Stations 
+                worksheet = package.Workbook.Worksheets[0]; 
+                rowCount = worksheet.Dimension.Rows; 
+
+                for (int row = 2; row <= rowCount; row++) 
+                {
+                    T nom = (T)Convert.ChangeType(worksheet.Cells[row, 3].Text, typeof(T));
+                    Noeud<T> Station = TrouverOuCréerNœud(nom);
+
+                    if (!Station.Ligne.Contains(worksheet.Cells[row, 2].Text)) Station.Ligne.Add(worksheet.Cells[row, 2].Text);
+                    Station.Longitude = Convert.ToDouble(worksheet.Cells[row, 4].Text);
+                    Station.Latitude = Convert.ToDouble(worksheet.Cells[row, 5].Text);
+                    Station.CalculTempsChangement();
+                }
+                #endregion
+                #endregion
+
+                foreach(Lien<T> L in ListeLien)
+                {
+                    L.CalculPoid();
+                }
+
+                foreach (Noeud<T> N in ListeNoeud)
+                {
+                    N.CalculTempsChangement();
                 }
             }
-            #endregion
 
-            ListeNoeud.Sort((a, b) => a.Num.CompareTo(b.Num));
-            this.form = form;
         }
 
         /// <summary>
-        ///  Parcours la liste des Noeuds pour voir si le noeud recherché y figure et le créé si il ne le trouve pas
+        /// Construit le Graph à partir d'une liste de Liens et d'un booléen déterminant la forme d'affichage.
         /// </summary>
-        /// <param name="num"></param>
-        /// <returns></returns>
-        public Noeud<int> TrouverOuCreerNoeud(int num)
+        /// <param name="LL"></param>
+        /// <param name="Rouge"></param>
+        public Graph(List<Lien<T>> LL, string couleur)
         {
-            foreach (var noeud in ListeNoeud)
+            ListeLien = LL;
+            ListeNoeud = new List<Noeud<T>>();
+
+            foreach (Lien<T> L in LL) 
             {
-                if (noeud.Num == num)
-                    return noeud;
+                if (!ExistenceNœud(L.Debut)) ListeNoeud.Add(L.Debut);
+                if (!ExistenceNœud(L.Fin)) ListeNoeud.Add(L.Fin);
             }
-            Noeud<int> nouveau = new Noeud<int>(num);
+            Couleur = couleur;
+        }
+
+        /// <summary>
+        ///  Parcours la liste des Nœuds pour voir si le nœud recherché y figure et le créé s'il ne le trouve pas.
+        /// </summary>
+        /// <param name="nom"></param>
+        /// <returns></returns>
+        public Noeud<T> TrouverOuCréerNœud(T nom)
+        {
+            foreach (Noeud<T> noeud in ListeNoeud)
+            {
+                if (noeud.Nom.Equals(nom))
+                   
+                return noeud;
+            }
+            Noeud<T> nouveau = new Noeud<T>(nom);
             ListeNoeud.Add(nouveau);
             return nouveau;
         }
 
         /// <summary>
-        /// Créé un lien entre deux noeuds
+        /// Détermine si un nœud existe dans ListeNœud.
         /// </summary>
-        /// <param name="debut"></param>
-        /// <param name="fin"></param>
-        public void AjouterLien(Noeud debut, Noeud fin)
-        {
-            Lien lien = new Lien(debut, fin);
-            ListeLien.Add(lien);
-            lien = new Lien(fin, debut); // On créer aussi le lien inverse car le cas du graph "karate" represente des liens d'amitié et n'est donc pas orienté. 
-            ListeLien.Add(lien);         // Le cas des stations de métros que l'on étudira par la suite ne le sera pas non plus.
-            Taille++;
-        }
-
-        #endregion
-
-        #region Propriété
-        /// <summary>
-        /// Calcule le nombre de noeud présent dans le graph
-        /// </summary>
-        public void CalculerOrdre()
-        {
-            Ordre = ListeNoeud.Count;
-        }
-        
-        /// <summary>
-        /// Determine si le graph est orienté ou non
-        /// </summary>
+        /// <param name="NœudRef"></param>
         /// <returns></returns>
-        public bool EstOriente()
+        public bool ExistenceNœud(Noeud<T> NœudRef)
         {
-            foreach (Lien L in ListeLien)
+            foreach (Noeud<T> noeud in ListeNoeud)
             {
-                Lien Linverse = new Lien(L.Fin, L.Debut);
-                bool InverseTrouvé = false;
-                foreach (Lien l in ListeLien)
-                {
-                    if (l == Linverse) InverseTrouvé = true;
-                }
-                if (!InverseTrouvé) return false;
-            }
+                if (noeud.Nom.Equals(NœudRef))
 
+                    return true;
+            }
             return false;
         }
 
         /// <summary>
-        /// retourne le nombre de cycle (ou circuits) présents dans le graph
+        /// Créé un lien entre deux nœuds.
         /// </summary>
-        /// <returns></returns>
-        public List<Noeud> Cycle()
+        /// <param name="début"></param>
+        /// <param name="fin"></param>
+        public void AjouterLien(Noeud<T> début, Noeud<T> fin, bool LienOrienté, string Ligne)
         {
-            List<Noeud> ListeNoeudCycle = new List<Noeud>();
-            List<Noeud> DFS = RechercheDFS(1);
-            for (int i = 0; i < Ordre; i++)
+            Lien<T> lien = new Lien<T>(début, fin, LienOrienté, Ligne);
+            ListeLien.Add(lien);
+            if (!LienOrienté)
             {
-                for (int j = Ordre - 1; j >= 0; j--)
-                {
-                    if (i != j)
-                    {
-                        for (int compteur = 0; compteur < Successeur(DFS[j], true).Count; compteur++)
-                        {
-                            if (DFS[i] == Successeur(DFS[j], true)[compteur] && DFS[i] != DFS[j].Pre)
-                            {
-
-                                ListeNoeudCycle.Add(Successeur(DFS[j], true)[compteur]);
-                                while (DFS[j] != null)
-                                {
-                                    ListeNoeudCycle.Add(DFS[j]);
-                                    DFS[j] = DFS[j].Pre;
-                                }
-                                ListeNoeudCycle.Add(DFS[i]);
-                                if (ListeNoeudCycle.Count > 3)
-
-                                    return ListeNoeudCycle;
-                                ListeNoeudCycle = new List<Noeud>();
-
-
-                            }
-                        }
-
-                    }
-                }
-
+                ListeLien.Add(lien.Inverse());
             }
-            return ListeNoeudCycle;
-
-
+            Taille++;
         }
         #endregion
 
-        #region Affichage
-        /// <summary>
-        /// Ecrit chaque lien et les renvoie sous la forme d'une liste.
-        /// </summary>
-        /// <returns></returns>
-        public List<string> AfficherListeAdj()
-        {
-            List<string> txt = new List<string>();          
-            foreach (Lien L in ListeLien)
-            {
-                if (!txt.Contains("Lien : " + L.Fin.Num + " - " + L.Debut.Num + "\n"))
-                {
-                    txt.Add("Lien : "+L.Debut.Num+" - "+L.Fin.Num+"\n");
-                }
-            }
-            return txt;
-        }
-        
-        /// <summary>
-        /// Affiche la Matrice d'adjacence et la renvoie sous forme d'un string
-        /// </summary>
-        /// <returns></returns>
-        public string AfficherMatAdj()
-        {
-            string txt = "  ";
-            for (int i = 0; i < Ordre; i++)
-            { 
-                if (i<10) txt += " ";
-                txt += i+" "; 
-            }
-            txt += "\n";
-            for (int i = 0; i < Ordre; i++)
-            {
-                if (i < 10) txt += " ";
-                txt += i ;
-                
-                for (int j = 0; j < Ordre; j++)
-                {
-                    if (MatriceAdjacence[i, j])
-                        txt+= " 1 ";
-                    else txt += "   ";
-                }
-                txt += "\n";
-                
-            }
-            return txt;
-        }
 
         #region Affichage du graphique
         /// <summary>
-        /// Implemente le dessin du graph dans le panel panelAffichage 
+        /// Implémente le dessin du graph dans le panel panelAffichage .
         /// </summary>          
         public void AfficherGraphique(Panel panelAffichage)
         {
@@ -230,178 +166,295 @@ namespace Graph_Karaté
         }
 
         /// <summary>
-        /// Dessine et place les noeuds et leurs liens en utilisant System.Drawing
+        /// Dessine et place les nœuds et leurs liens en utilisant System.Drawing.
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
         private void DessinerGraphique(object sender, PaintEventArgs e)
         {
             Graphics g = e.Graphics;
-            Pen pen = new Pen(System.Drawing.Color.Black, 1);
-            int nodeSize = 30;
+            
+            int TailleDesNoeuds = 25;
 
-            double angleStep = 360.0 / Ordre;
-            int radius = 400;
-            Point center = new Point((1400 * 5 / 6 - 100) / 2, 900 / 2);
+            Point center = new Point(1920 / 2-35, 1080 / 2-50);
 
-            Dictionary<Noeud, Point> positions = new Dictionary<Noeud, Point>();
-            for (int i = 0; i < ListeNoeud.Count; i++)
+            Dictionary<Noeud<T>, Point> positions = new Dictionary<Noeud<T>, Point>();
+            foreach (Noeud<T> N in ListeNoeud)
             {
-                double angle = i * angleStep;
-                int x = (int)(center.X + radius * Math.Cos(angle * Math.PI / 180));
-                int y = (int)(center.Y + radius * Math.Sin(angle * Math.PI / 180));
-                positions[ListeNoeud[i]] = new Point(x, y);
+                int x = (int)(center.X + N.Localisation.X*0.0093);
+                int y = (int)(center.Y + N.Localisation.Y*- 0.0015);
+                positions[N] = new Point(x, y);
             }
 
-            // Dessiner les liens
-            foreach (var lien in ListeLien)
+            #region Affichage des Liens
+            foreach (Lien<T> lien in ListeLien)
             {
+                int tailleTrait = 10;
+                Pen pen = new Pen(Color.Transparent, tailleTrait);
+
+                string Ligne = lien.Ligne;
+
+                #region Reglage des couleurs
+                if (Couleur == "Rouge") pen = new Pen(Color.Red, tailleTrait);
+                else if (Couleur == "Bleu") pen = new Pen(Color.Blue, tailleTrait);
+                else if (Ligne == "1") pen = new Pen(Color.Yellow, tailleTrait);
+                else if (Ligne == "2") pen = new Pen(Color.DodgerBlue, tailleTrait);
+                else if (Ligne == "3") pen = new Pen(Color.Olive, tailleTrait);
+                else if (Ligne == "4") pen = new Pen(Color.MediumOrchid, tailleTrait);
+                else if (Ligne == "5") pen = new Pen(Color.Coral, tailleTrait);
+                else if (Ligne == "6" || Ligne == "7bis") pen = new Pen(Color.MediumAquamarine, tailleTrait);
+                else if (Ligne == "7") pen = new Pen(Color.LightPink, tailleTrait);
+                else if (Ligne == "8") pen = new Pen(Color.Plum, tailleTrait);
+                else if (Ligne == "9") pen = new Pen(Color.YellowGreen, tailleTrait);
+                else if (Ligne == "10") pen = new Pen(Color.Goldenrod, tailleTrait);
+                else if (Ligne == "11") pen = new Pen(Color.Sienna, tailleTrait);
+                else if (Ligne == "12") pen = new Pen(Color.ForestGreen, tailleTrait);
+                else if (Ligne == "13" || Ligne == "3bis") pen = new Pen(Color.SkyBlue, tailleTrait);
+                else if (Ligne == "14") pen = new Pen(Color.BlueViolet, tailleTrait);
+                #endregion
+
                 Point start = positions[lien.Debut];
+
+                if (lien.Orienté )
+                {
+                    Pen fleche = new Pen(Color.Gray, 8);
+                    fleche.CustomEndCap = new AdjustableArrowCap(3, 2);
+                    //pen.EndCap = LineCap.ArrowAnchor;
+                    Point endMilieu = new Point(positions[lien.Fin].X + (start.X-positions[lien.Fin].X)*2/5, positions[lien.Fin].Y + (start.Y - positions[lien.Fin].Y) * 2 / 5);
+                    g.DrawLine(fleche, start, endMilieu);
+                }
+                
+                pen.EndCap = LineCap.NoAnchor;
+     
                 Point end = positions[lien.Fin];
                 g.DrawLine(pen, start, end);
             }
+            #endregion
 
-            // Dessiner les nœuds et ajouter leurs numéros
-            Brush brush = Brushes.Gray;
+            #region Affichage des Noeuds
+            Brush brush;
+
             System.Drawing.Font font = new System.Drawing.Font("Arial", 10);
 
-            for (int i = 0; i< ListeNoeud.Count;i++)
+            foreach (Noeud<T> N in ListeNoeud)
             {
-                Point p = positions[ListeNoeud[i]];
+                #region Reglage des couleurs
+                if (Couleur == "Rouge") brush = Brushes.Red;
+                else if (Couleur == "Bleu") brush = Brushes.Blue;
+                else if (N.Ligne == null) brush = Brushes.Red;
+                else if (N.Ligne.Count > 1) brush = Brushes.LightGray;
+                else if (N.Ligne.Contains( "1")) brush = Brushes.Yellow;
+                else if (N.Ligne.Contains("2")) brush = Brushes.DodgerBlue;
+                else if (N.Ligne.Contains("3")) brush = Brushes.Olive;
+                else if (N.Ligne.Contains("4")) brush = Brushes.MediumOrchid;
+                else if (N.Ligne.Contains("5")) brush = Brushes.Coral;
+                else if (N.Ligne.Contains("6") || N.Ligne.Contains("7bis")) brush = Brushes.MediumAquamarine;
+                else if (N.Ligne.Contains("7")) brush = Brushes.LightPink;
+                else if (N.Ligne.Contains("8")) brush = Brushes.Plum;
+                else if (N.Ligne.Contains("9")) brush = Brushes.YellowGreen;
+                else if (N.Ligne.Contains("10")) brush = Brushes.Goldenrod;
+                else if (N.Ligne.Contains("11")) brush = Brushes.Sienna;
+                else if (N.Ligne.Contains("12")) brush = Brushes.ForestGreen;
+                else if (N.Ligne.Contains("13") || N.Ligne.Contains("3bis")) brush = Brushes.SkyBlue; 
+                else if (N.Ligne.Contains("14")) brush = Brushes.BlueViolet;
+                else brush = Brushes.Transparent;
+                #endregion
+
+                Point p = positions[N];
                 
-                g.FillEllipse(brush, p.X - nodeSize / 2, p.Y - nodeSize / 2, nodeSize, nodeSize);
+                g.FillEllipse(brush, p.X - TailleDesNoeuds / 2, p.Y - TailleDesNoeuds / 2, TailleDesNoeuds, TailleDesNoeuds);
 
-                // Dessiner le numéro du sommet à côté du nœud
-                string numero = ListeNoeud[i].Num.ToString();
-                SizeF stringSize = g.MeasureString(numero, font);
-                PointF textPosition = new PointF(p.X - stringSize.Width / 2, p.Y - stringSize.Height / 2);
-                g.DrawString(numero, font, Brushes.Black, textPosition);
-
-                
-                
-
-            }
-        }
-
-        #endregion
-         #endregion
-
-            #region Parcours du graph
-            /// <summary>
-            /// Cherche dans la ListeLien tous les Noeuds relié au Noeud étudié "N"
-            /// </summary>
-            /// <param name="N"></param>
-            /// <param name="Ocroissant"></param>
-            /// <returns></returns>
-            public List<Noeud> Successeur(Noeud N, bool Ocroissant)
-        {
-            List<Noeud> successeur = new List<Noeud>();
-            foreach (Lien l in ListeLien)
-            {
-                if (l.Debut == N)
+                string[] nomAbrégé = N.Nom.ToString().Split(' ', '\'');
+                List<string> nomAbrégéListe = new List<string>();
+                string txt = "";
+                foreach (string s in nomAbrégé)
                 {
-                    successeur.Add(l.Fin);
+                    if (s == "Porte") nomAbrégéListe.Add("P");
+                    else if (s.Length > 2) nomAbrégéListe.Add(s);
                 }
+                foreach (string s in nomAbrégéListe)
+                {
+                    if (s.Length > 4) txt += s.Substring(0, 4);
+                    else txt += s.Substring(0, s.Length);
+                    txt += " ";
+                }
+                    
+                SizeF stringSize = g.MeasureString(txt, font);
+                PointF textePosition = new PointF(p.X - stringSize.Width / 2, p.Y - stringSize.Height / 2);
+                g.DrawString(txt, font, Brushes.Black, textePosition);
+            }
+            #endregion
+        }
+        #endregion
+
+        /// <summary>
+        /// Trouve le chemin le plus court entre un Nœud A et un Nœud B du graph en suivant l'algorithme de Dijkstra.
+        /// </summary>
+        /// <param name="NœudA"></param>
+        /// <param name="NœudB"></param>
+        /// <param name="CouleurRouge"></param>
+        /// <returns></returns>
+        public Graph<T> Dijkstra(T NœudA, T NœudB, string couleur)
+        {
+            #region Initialisation
+            Dictionary<Noeud<T>, int> Distance = new Dictionary<Noeud<T>, int>();
+            Dictionary<Noeud<T>, Noeud<T>> Précèdent = new Dictionary<Noeud<T>, Noeud<T>>();
+            Dictionary<List<Lien<T>>, int> TempsChemin = new Dictionary<List<Lien<T>>, int>();
+            List<List<Lien<T>>> CheminsTrouvé = new List<List<Lien<T>>>();
+            List<Noeud<T>> ListePriorité = new List<Noeud<T>>();
+
+            foreach (Noeud<T> N in ListeNoeud)
+            {
+                Distance[N] = int.MaxValue;
+                Précèdent[N] = null;
             }
 
-            if (Ocroissant) successeur.Sort((a, b) => a.Num.CompareTo(b.Num));
-            else successeur.Sort((a, b) => b.Num.CompareTo(a.Num));
-            return successeur;
+            Noeud<T> Départ = TrouverOuCréerNœud(NœudA);
+            Noeud<T> Fin = TrouverOuCréerNœud(NœudB);
+
+            if (Départ.Longitude == 0 || Fin.Longitude == 0) return null;
+
+            Distance[Départ] = 0; 
+            ListePriorité.Add(Départ);
+            #endregion
+
+            while (ListePriorité.Count > 0)
+            {
+                #region Recuperation du Noeud Aillant le chemin le moins long
+                ListePriorité.Sort((a, b) => Distance[a].CompareTo(Distance[b]));
+                Noeud<T> NœudCourant = ListePriorité[0];
+                ListePriorité.RemoveAt(0);
+                #endregion
+
+                #region Constitution du graph representant un chemin lorsque le noeud d'arrivé est atteind
+                if (NœudCourant.Equals(Fin))
+                {
+                    int Temps = Distance[Fin];
+                    List<Lien<T>> Chemin = new List<Lien<T>>();
+                    Noeud<T> Actuel = Fin;
+
+                    while (Actuel != null && !Actuel.Equals(Départ))
+                    {
+                        Noeud<T> Prec = Précèdent[Actuel];
+                        Lien<T> lien = new Lien<T>(Prec, Actuel); 
+                        foreach (string ligne in Prec.Ligne)
+                        {
+                            if (Actuel.Ligne.Contains(ligne))lien.Ligne = ligne;
+                        }
+                        Chemin.Add(lien);
+
+                        Actuel = Prec;
+                    }
+
+                    #region Prise en compte des changment de ligne sur le chemin trouvé
+                    for (int i = 0; i < Chemin.Count - 1; i++)
+                    {
+                        if (Chemin[i].Ligne != Chemin[i + 1].Ligne) Temps += Chemin[i].Fin.Changement;
+                    }
+                    #endregion
+
+                    //Chemin.Reverse(); à changer si l'on veut afficher le chemin qq part
+                    TempsChemin[Chemin] = Temps;
+                    CheminsTrouvé.Add(Chemin);
+                }
+                #endregion
+
+                #region Alogithme de Dijkstra
+                foreach (Lien<T> L in ListeLien)
+                {
+                    int NouvelleDistance = Distance[NœudCourant] + L.Poid;
+                    if (L.Debut.Equals(NœudCourant) && NouvelleDistance < Distance[L.Fin])
+                    {
+                            Distance[L.Fin] = NouvelleDistance;
+                            Précèdent[L.Fin] = NœudCourant;
+                            ListePriorité.Add(L.Fin);
+                    }
+                }
+                #endregion
+            }
+
+            if (CheminsTrouvé == null ) return null;
+
+            if (TempsChemin.MinBy(kvp => kvp.Value).Value > 1000) return null;
+            return new Graph<T>(TempsChemin.MinBy(kvp => kvp.Value).Key, couleur); // on choisit le chemin le plus court parmi tous les chemins trouvé
         }
 
         /// <summary>
-        /// Methode de Recherche en largeur BFS 
+        /// Trouve le chemin le plus court entre un Nœud A et un Nœud B du graph en suivant l'algorithme de BellmanFord.
         /// </summary>
+        /// <param name="NœudA"></param>
+        /// <param name="NœudB"></param>
+        /// <param name="CouleurRouge"></param>
         /// <returns></returns>
-        public List<Noeud> RechercheBFS(int numNoeudDebut)
+        public Graph<T> BellmanFord(T NœudA, T NœudB, string couleur)
         {
-            for (int i = 0; i < Ordre; i++)
+            #region Initialisation
+            Dictionary<Noeud<T>, int> Distance = new Dictionary<Noeud<T>, int>();
+            Dictionary<Noeud<T>, Noeud<T>> Précédent = new Dictionary<Noeud<T>, Noeud<T>>();
+            Noeud<T> Départ = TrouverOuCréerNœud(NœudA);
+            Noeud<T> Fin = TrouverOuCréerNœud(NœudB);
+
+            foreach (Noeud<T> N in ListeNoeud)
             {
-                ListeNoeud[i].Pre = null;
+                Distance[N] = int.MaxValue;
+                Précédent[N] = null;
             }
 
-            Queue<Noeud> fileBFS = new Queue<Noeud>();
-            List<Noeud> NoeudAppercu = new List<Noeud>();
-            List<Noeud> ListeRechercheBFS = new List<Noeud>();
+            Distance[Départ] = 0;
+            #endregion
 
-            for (int i = 0; i < Ordre; i++)
+            #region Algorithme de BellmanFord
+            for (int i = 0; i < ListeNoeud.Count -1; i++)
             {
-                if (!NoeudAppercu.Contains(ListeNoeud[i]))
+                foreach(Noeud<T> N in ListeNoeud)
                 {
-                    if (ListeRechercheBFS.Count > 0) fileBFS.Enqueue(ListeNoeud[i]);
-                    else fileBFS.Enqueue(ListeNoeud[numNoeudDebut-1]);
-
-                    while (fileBFS.Count > 0)
+                    foreach(Lien<T> L in ListeLien)
                     {
-                        Noeud NoeudSuivant = fileBFS.Dequeue();
-                        NoeudAppercu.Add(NoeudSuivant);
-                        ListeRechercheBFS.Add(NoeudSuivant);
-
-                        foreach (Noeud SuccesseurN in Successeur(NoeudSuivant, true))
+                        if (L.Debut == N && Distance[L.Debut]!= int.MaxValue)
                         {
-                            if (!NoeudAppercu.Contains(SuccesseurN))
+                            int NouvelleDistance = Distance[N] + L.Poid;
+
+                            if (Précédent[N] != null)
                             {
-                                SuccesseurN.Pre = NoeudSuivant;
-                                fileBFS.Enqueue(SuccesseurN);
-                                NoeudAppercu.Add(SuccesseurN);
+                                bool MêmeLigne = false;
+                                foreach (string ligne in Précédent[N].Ligne)
+                                {
+                                    if (L.Fin.Ligne.Contains(ligne)) MêmeLigne = true;
+                                }
+                                if (!MêmeLigne) NouvelleDistance += N.Changement;
+                            }
+
+                            if (NouvelleDistance < Distance[L.Fin])
+                            {
+                                
+                                Distance[L.Fin] = NouvelleDistance;
+                                Précédent[L.Fin] = N;
                             }
                         }
                     }
                 }
-
             }
-            return ListeRechercheBFS;
-        }
+            #endregion
 
-        /// <summary>
-        /// Methode de Recherche en profondeur DFS 
-        /// </summary>
-        /// <returns></returns>
-        public List<Noeud> RechercheDFS(int numNoeudDebut)
-        {
-            for (int i = 0; i<Ordre;i++)
+            Noeud<T> NœudCourant = Fin;
+            List<Lien<T>> Chemin = new List<Lien<T>>();
+            while (Précédent[NœudCourant] != null && NœudCourant != Départ && Précédent[NœudCourant]!= NœudCourant)
             {
-                ListeNoeud[i].Pre = null;
-            }
+                
 
-
-            Stack<Noeud> PileDFS = new Stack<Noeud>();
-            List<Noeud> NoeudAppercu = new List<Noeud>();
-            List<Noeud> ListeRechercheDFS = new List<Noeud>();
-
-            for (int i = 0; i < Ordre; i++)
-            {
-                if (!NoeudAppercu.Contains(ListeNoeud[i]))
+                Lien<T> lien = new Lien<T>(Précédent[NœudCourant], NœudCourant);
+                foreach (string ligne in Précédent[NœudCourant].Ligne)
                 {
-                    if (PileDFS.Count > 0) PileDFS.Push(ListeNoeud[i]);
-                    else PileDFS.Push(ListeNoeud[numNoeudDebut - 1]);
-
-                    while (PileDFS.Count > 0)
-                    {
-                        Noeud NoeudSuivant = PileDFS.Pop();
-                        if (!NoeudAppercu.Contains(NoeudSuivant)) NoeudAppercu.Add(NoeudSuivant);
-                        ListeRechercheDFS.Add(NoeudSuivant);
-
-                        foreach (Noeud SuccesseurN in Successeur(NoeudSuivant, false))
-                        {
-                            if (!NoeudAppercu.Contains(SuccesseurN))
-                            {
-                                SuccesseurN.Pre = NoeudSuivant;
-                                PileDFS.Push(SuccesseurN);
-                                NoeudAppercu.Add(SuccesseurN);
-                            }
-                        }
-                    }
+                    if (NœudCourant.Ligne.Contains(ligne)) lien.Ligne = ligne;
                 }
+                Chemin.Add(lien);
+
+                NœudCourant = Précédent[NœudCourant];
             }
-            return ListeRechercheDFS;
+
+            if (Chemin != null) return new Graph<T>(Chemin, couleur);
+            
+            return null;
         }
-
-        
-        #endregion
-
-
-
-
     }
 }
